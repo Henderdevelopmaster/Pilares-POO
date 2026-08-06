@@ -1,3 +1,5 @@
+package Ejercicio1;
+
 public abstract class Figura {
     protected String nombre;
     public Figura(String nombre) {
@@ -7,7 +9,7 @@ public abstract class Figura {
     public abstract double calcularArea();
     // Metodo concreto: lo heredan todas las hijas
     public void mostrar() {
-        System.out.println("Figura: " + nombre);
+        System.out.println("Ejercicio1.Figura: " + nombre);
         System.out.println("Area: " + calcularArea());
     }
 }

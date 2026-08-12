@@ -1,7 +1,12 @@
 package com.sena.examenes;
 
 import com.sena.examenes.application.port.in.UsuarioUseCase;
+import com.sena.examenes.application.port.out.UsuarioRepositoryPort;
 import com.sena.examenes.application.service.UsuarioService;
+import com.sena.examenes.domain.Usuario;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 /*
 -------------------------------------------------------
@@ -14,7 +19,9 @@ limite visible para quien usa el sistema.
 */
 public class MainUsuarios {
     public static void main(String[] args) {
-        UsuarioUseCase usuarioUseCase = new UsuarioService();
+        // En la Sesion 2 el servicio recibe el puerto OUT por constructor.
+        // Este adaptador falso permite conservar una prueba de consola sin MySQL.
+        UsuarioUseCase usuarioUseCase = new UsuarioService(new RepositorioEnMemoria());
         usuarioUseCase.registrar("cbarrientos", "cbarrientos@sena.edu.co");
         usuarioUseCase.registrar("lgomez", "lgomez@sena.edu.co");
 
@@ -36,6 +43,35 @@ public class MainUsuarios {
             usuarioUseCase.desactivarUsuario("noexiste");
         } catch (IllegalArgumentException e) {
             System.out.println("Error esperado: " + e.getMessage());
+        }
+    }
+
+    /* Adaptador local de prueba: cumple el puerto OUT sin depender de Spring. */
+    private static class RepositorioEnMemoria implements UsuarioRepositoryPort {
+        private final List<Usuario> datos = new ArrayList<>();
+
+        @Override
+        public Usuario guardar(Usuario usuario) {
+            datos.removeIf(actual -> actual.getUsername().equalsIgnoreCase(usuario.getUsername()));
+            datos.add(usuario);
+            return usuario;
+        }
+
+        @Override
+        public Optional<Usuario> buscarPorUsername(String username) {
+            return datos.stream()
+                    .filter(u -> u.getUsername().equalsIgnoreCase(username))
+                    .findFirst();
+        }
+
+        @Override
+        public List<Usuario> listarActivos() {
+            return datos.stream().filter(Usuario::isActivo).toList();
+        }
+
+        @Override
+        public boolean existePorUsername(String username) {
+            return buscarPorUsername(username).isPresent();
         }
     }
 }

@@ -28,11 +28,10 @@ public class UsuarioRepositoryAdapter implements UsuarioRepositoryPort {
 
     @Override
     public Usuario guardar(Usuario usuario) {
-        // Conserva el id existente para que save haga UPDATE al desactivar.
-        UsuarioEntity entity = jpaRepository.findByUsernameIgnoreCase(usuario.getUsername())
-                .map(actual -> new UsuarioEntity(actual.getId(), usuario.getUsername(),
-                        usuario.getEmail(), usuario.isActivo()))
-                .orElseGet(() -> mapper.aEntity(usuario));
+        // Conserva el id existente para que save haga UPDATE y mantiene roles.
+        UsuarioEntity entity = mapper.aEntity(usuario);
+        jpaRepository.findByUsernameIgnoreCase(usuario.getUsername())
+                .ifPresent(actual -> entity.setId(actual.getId()));
         UsuarioEntity guardado = jpaRepository.save(entity);
         return mapper.aDominio(guardado);
     }

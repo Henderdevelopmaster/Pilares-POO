@@ -18,4 +18,5 @@ public interface UsuarioUseCase {
     Optional<Usuario> buscarPorUsername(String username);
     List<Usuario> listarActivos();
     void desactivarUsuario(String username);
+    Usuario asignarRol(String username, String nombreRol);
 }

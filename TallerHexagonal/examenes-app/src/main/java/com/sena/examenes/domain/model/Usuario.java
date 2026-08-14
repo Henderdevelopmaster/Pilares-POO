@@ -1,5 +1,8 @@
 package com.sena.examenes.domain;
 
+import java.util.HashSet;
+import java.util.Set;
+
 /*
 -------------------------------------------------------
 Clase: Usuario
@@ -14,6 +17,7 @@ public class Usuario {
     private String username;
     private String email;
     private boolean activo;
+    private final Set<Rol> roles;
 
     /*
     Constructor del dominio. Valida los datos propios del usuario y lo crea
@@ -29,6 +33,7 @@ public class Usuario {
         this.username = username;
         this.email = email;
         this.activo = true;
+        this.roles = new HashSet<>();
     }
 
     public String getUsername() { return username; }
@@ -38,5 +43,26 @@ public class Usuario {
     // El dominio expone una accion, no un setter, para proteger la regla de estado.
     public void desactivar() {
         this.activo = false;
+    }
+
+    /*
+    Set no permite duplicados. Como Rol sobrescribe equals/hashCode por nombre,
+    asignar dos veces ADMIN deja una sola entrada sin un if adicional.
+    */
+    public void asignarRol(Rol rol) {
+        if (rol == null) {
+            throw new IllegalArgumentException("El rol no puede ser nulo.");
+        }
+        roles.add(rol);
+    }
+
+    public boolean tieneRol(String nombreRol) {
+        return roles.stream()
+                .anyMatch(r -> r.getNombre().equalsIgnoreCase(nombreRol));
+    }
+
+    /* Set.copyOf evita que quien recibe el resultado modifique el conjunto interno. */
+    public Set<Rol> getRoles() {
+        return Set.copyOf(roles);
     }
 }

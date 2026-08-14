@@ -1,27 +1,33 @@
 package com.sena.examenes.application.service;
 
 import com.sena.examenes.application.port.in.UsuarioUseCase;
+import com.sena.examenes.application.port.out.RolRepositoryPort;
 import com.sena.examenes.application.port.out.UsuarioRepositoryPort;
 import com.sena.examenes.domain.Usuario;
+import com.sena.examenes.domain.Rol;
 import java.util.List;
 import java.util.Optional;
+import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
 
 /*
 -------------------------------------------------------
 Clase: UsuarioService
 
-Implementa el puerto de entrada con una lista temporal en memoria. Esta es una
-version de aprendizaje: el resto de la aplicacion conoce el contrato y no el
-ArrayList, por lo que despues puede cambiarse por MySQL sin cambiar el dominio.
+Implementa el puerto de entrada y coordina los puertos de salida de usuarios y
+roles. La infraestructura concreta queda fuera: el servicio solo conoce
+interfaces y por eso conserva la independencia de la arquitectura hexagonal.
 -------------------------------------------------------
 */
 @Service
 public class UsuarioService implements UsuarioUseCase {
     private final UsuarioRepositoryPort usuarioRepositoryPort;
+    private final RolRepositoryPort rolRepositoryPort;
 
-    public UsuarioService(UsuarioRepositoryPort usuarioRepositoryPort) {
+    public UsuarioService(UsuarioRepositoryPort usuarioRepositoryPort,
+                           RolRepositoryPort rolRepositoryPort) {
         this.usuarioRepositoryPort = usuarioRepositoryPort;
+        this.rolRepositoryPort = rolRepositoryPort;
     }
 
     @Override
@@ -55,5 +61,23 @@ public class UsuarioService implements UsuarioUseCase {
                         "No existe un usuario con ese username."));
         usuario.desactivar();
         usuarioRepositoryPort.guardar(usuario);
+    }
+
+    /*
+    Coordina dos agregados a traves de dos puertos OUT. Primero valida que
+    existan usuario y rol; luego el dominio asigna el rol y guardar persiste
+    el usuario actualizado. No se deja esta validacion al mapper porque alli
+    ya seria un detalle de infraestructura y no produciria un 404 claro.
+    */
+    @Override
+    public Usuario asignarRol(String username, String nombreRol) {
+        Usuario usuario = usuarioRepositoryPort.buscarPorUsername(username)
+                .orElseThrow(() -> new NoSuchElementException(
+                        "No existe un usuario con ese username."));
+        Rol rol = rolRepositoryPort.buscarPorNombre(nombreRol)
+                .orElseThrow(() -> new NoSuchElementException(
+                        "No existe un rol con ese nombre."));
+        usuario.asignarRol(rol);
+        return usuarioRepositoryPort.guardar(usuario);
     }
 }

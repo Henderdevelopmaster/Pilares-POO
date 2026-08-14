@@ -2,8 +2,10 @@ package com.sena.examenes;
 
 import com.sena.examenes.application.port.in.UsuarioUseCase;
 import com.sena.examenes.application.port.out.UsuarioRepositoryPort;
+import com.sena.examenes.application.port.out.RolRepositoryPort;
 import com.sena.examenes.application.service.UsuarioService;
 import com.sena.examenes.domain.Usuario;
+import com.sena.examenes.domain.Rol;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -21,7 +23,8 @@ public class MainUsuarios {
     public static void main(String[] args) {
         // En la Sesion 2 el servicio recibe el puerto OUT por constructor.
         // Este adaptador falso permite conservar una prueba de consola sin MySQL.
-        UsuarioUseCase usuarioUseCase = new UsuarioService(new RepositorioEnMemoria());
+        UsuarioUseCase usuarioUseCase = new UsuarioService(
+                new RepositorioEnMemoria(), new RolesEnMemoria());
         usuarioUseCase.registrar("cbarrientos", "cbarrientos@sena.edu.co");
         usuarioUseCase.registrar("lgomez", "lgomez@sena.edu.co");
 
@@ -73,5 +76,20 @@ public class MainUsuarios {
         public boolean existePorUsername(String username) {
             return buscarPorUsername(username).isPresent();
         }
+    }
+
+    private static class RolesEnMemoria implements RolRepositoryPort {
+        private final List<Rol> datos = new ArrayList<>();
+
+        @Override
+        public Rol guardar(Rol rol) { datos.add(rol); return rol; }
+
+        @Override
+        public Optional<Rol> buscarPorNombre(String nombre) {
+            return datos.stream().filter(r -> r.getNombre().equalsIgnoreCase(nombre)).findFirst();
+        }
+
+        @Override
+        public List<Rol> listarTodos() { return List.copyOf(datos); }
     }
 }

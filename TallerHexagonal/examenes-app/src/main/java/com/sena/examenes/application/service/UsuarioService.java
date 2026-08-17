@@ -3,6 +3,7 @@ package com.sena.examenes.application.service;
 import com.sena.examenes.application.port.in.UsuarioUseCase;
 import com.sena.examenes.application.port.out.RolRepositoryPort;
 import com.sena.examenes.application.port.out.UsuarioRepositoryPort;
+import com.sena.examenes.application.port.out.PasswordEncoderPort;
 import com.sena.examenes.domain.Usuario;
 import com.sena.examenes.domain.Rol;
 import java.util.List;
@@ -23,20 +24,36 @@ interfaces y por eso conserva la independencia de la arquitectura hexagonal.
 public class UsuarioService implements UsuarioUseCase {
     private final UsuarioRepositoryPort usuarioRepositoryPort;
     private final RolRepositoryPort rolRepositoryPort;
+    private final PasswordEncoderPort passwordEncoderPort;
 
     public UsuarioService(UsuarioRepositoryPort usuarioRepositoryPort,
-                           RolRepositoryPort rolRepositoryPort) {
+                           RolRepositoryPort rolRepositoryPort,
+                           PasswordEncoderPort passwordEncoderPort) {
         this.usuarioRepositoryPort = usuarioRepositoryPort;
         this.rolRepositoryPort = rolRepositoryPort;
+        this.passwordEncoderPort = passwordEncoderPort;
+    }
+
+    /* Compatibilidad de la prueba de consola de sesiones anteriores. */
+    public UsuarioService(UsuarioRepositoryPort usuarios, RolRepositoryPort roles) {
+        this(usuarios, roles, new PasswordEncoderPort() {
+            public String codificar(String password) { return password; }
+            public boolean verificar(String password, String hash) { return password.equals(hash); }
+        });
     }
 
     @Override
-    public Usuario registrar(String username, String email) {
+    public Usuario registrar(String username, String email, String password) {
         if (usuarioRepositoryPort.existePorUsername(username)) {
             throw new IllegalStateException("Ya existe un usuario con ese username.");
         }
-        Usuario nuevo = new Usuario(username, email);
+        Usuario nuevo = new Usuario(username, email, passwordEncoderPort.codificar(password));
         return usuarioRepositoryPort.guardar(nuevo);
+    }
+
+    /* Firma auxiliar para conservar las pruebas de sesiones anteriores. */
+    public Usuario registrar(String username, String email) {
+        return registrar(username, email, "clave-de-prueba");
     }
 
     @Override

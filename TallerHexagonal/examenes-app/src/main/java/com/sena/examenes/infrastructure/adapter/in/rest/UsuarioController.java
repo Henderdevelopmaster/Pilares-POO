@@ -4,7 +4,6 @@ import com.sena.examenes.application.port.in.UsuarioUseCase;
 import com.sena.examenes.domain.Usuario;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 /*
 -------------------------------------------------------
@@ -36,7 +34,7 @@ public class UsuarioController {
 
     @PostMapping
     public ResponseEntity<UsuarioResponse> registrar(@RequestBody UsuarioRequest request) {
-        Usuario usuario = usuarioUseCase.registrar(request.username(), request.email());
+        Usuario usuario = usuarioUseCase.registrar(request.username(), request.email(), request.password());
         return ResponseEntity.status(HttpStatus.CREATED).body(UsuarioResponse.desde(usuario));
     }
 
@@ -73,18 +71,4 @@ public class UsuarioController {
         return ResponseEntity.ok(UsuarioResponse.desde(usuario));
     }
 
-    @ExceptionHandler(IllegalStateException.class)
-    public ResponseEntity<String> manejarDuplicado(IllegalStateException e) {
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
-    }
-
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<String> manejarDatosInvalidos(IllegalArgumentException e) {
-        return ResponseEntity.badRequest().body(e.getMessage());
-    }
-
-    @ExceptionHandler(NoSuchElementException.class)
-    public ResponseEntity<String> manejarNoEncontrado(NoSuchElementException e) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-    }
 }

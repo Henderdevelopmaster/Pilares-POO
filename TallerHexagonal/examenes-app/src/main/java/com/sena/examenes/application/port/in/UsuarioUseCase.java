@@ -14,7 +14,7 @@ prueba. El servicio implementa este contrato y los adaptadores lo consumen.
 -------------------------------------------------------
 */
 public interface UsuarioUseCase {
-    Usuario registrar(String username, String email);
+    Usuario registrar(String username, String email, String password);
     Optional<Usuario> buscarPorUsername(String username);
     List<Usuario> listarActivos();
     void desactivarUsuario(String username);

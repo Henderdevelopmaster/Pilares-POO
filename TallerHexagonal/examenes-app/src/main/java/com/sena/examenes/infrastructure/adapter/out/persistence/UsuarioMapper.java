@@ -24,7 +24,7 @@ public class UsuarioMapper {
 
     public UsuarioEntity aEntity(Usuario usuario) {
         UsuarioEntity entity = new UsuarioEntity(null, usuario.getUsername(),
-                usuario.getEmail(), usuario.isActivo());
+                usuario.getEmail(), usuario.getPasswordHash(), usuario.isActivo());
         entity.setRoles(usuario.getRoles().stream()
                 .map(this::buscarRolEntityExistente)
                 .collect(Collectors.toSet()));
@@ -38,7 +38,7 @@ public class UsuarioMapper {
     }
 
     public Usuario aDominio(UsuarioEntity entity) {
-        Usuario usuario = new Usuario(entity.getUsername(), entity.getEmail());
+        Usuario usuario = new Usuario(entity.getUsername(), entity.getEmail(), entity.getPasswordHash());
         if (!entity.isActivo()) {
             usuario.desactivar();
         }

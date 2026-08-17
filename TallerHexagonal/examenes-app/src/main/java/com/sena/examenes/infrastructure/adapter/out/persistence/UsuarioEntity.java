@@ -37,6 +37,9 @@ public class UsuarioEntity {
     private String email;
 
     @Column(nullable = false)
+    private String passwordHash;
+
+    @Column(nullable = false)
     private boolean activo;
 
     @ManyToMany(fetch = FetchType.EAGER)
@@ -49,10 +52,11 @@ public class UsuarioEntity {
         // Constructor vacio exigido por Hibernate.
     }
 
-    public UsuarioEntity(Long id, String username, String email, boolean activo) {
+    public UsuarioEntity(Long id, String username, String email, String passwordHash, boolean activo) {
         this.id = id;
         this.username = username;
         this.email = email;
+        this.passwordHash = passwordHash;
         this.activo = activo;
     }
 
@@ -60,6 +64,8 @@ public class UsuarioEntity {
     public void setId(Long id) { this.id = id; }
     public String getUsername() { return username; }
     public String getEmail() { return email; }
+    public String getPasswordHash() { return passwordHash; }
+    public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
     public boolean isActivo() { return activo; }
     public Set<RolEntity> getRoles() { return roles; }
     public void setRoles(Set<RolEntity> roles) { this.roles = roles; }

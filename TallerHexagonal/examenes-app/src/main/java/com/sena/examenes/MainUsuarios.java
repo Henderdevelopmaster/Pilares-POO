@@ -25,11 +25,11 @@ public class MainUsuarios {
         // Este adaptador falso permite conservar una prueba de consola sin MySQL.
         UsuarioUseCase usuarioUseCase = new UsuarioService(
                 new RepositorioEnMemoria(), new RolesEnMemoria());
-        usuarioUseCase.registrar("cbarrientos", "cbarrientos@sena.edu.co");
-        usuarioUseCase.registrar("lgomez", "lgomez@sena.edu.co");
+        usuarioUseCase.registrar("cbarrientos", "cbarrientos@sena.edu.co", "clave1");
+        usuarioUseCase.registrar("lgomez", "lgomez@sena.edu.co", "clave2");
 
         try {
-            usuarioUseCase.registrar("cbarrientos", "otro@correo.com");
+            usuarioUseCase.registrar("cbarrientos", "otro@correo.com", "clave3");
         } catch (IllegalStateException e) {
             System.out.println("Error esperado: " + e.getMessage());
         }
